@@ -284,15 +284,25 @@ app = Flask(__name__)
 
 @app.template_filter('linkbugs')
 def linkbugs(s):
+
+    http_url_anchor = '<a href="{0}">{1}</a>'
+    http_re = re.compile(r'(?P<link_text>(http\:\/\/|https\:\/\/)(?:[^\\s"]*)\W)')
+    n = http_re.search(s)
+    if n:
+        s = re.sub(http_re,
+                   Markup(http_url_anchor.format(n.group('link_text'),
+                                                    n.group('link_text'))),
+                   s)
+
     bug_url_anchor = '<a href="https://bugzilla.mozilla.org/show_bug.cgi?id={0}">{1}</a>'
     bug_re = re.compile(r'\b(?P<bug_text>bug\s+(?P<bug_id>[0-9]+))\b',
                         re.IGNORECASE)
     m = bug_re.search(s)
     if m:
-        return re.sub(bug_re,
-                      Markup(bug_url_anchor.format(m.group('bug_id'),
+        s = re.sub(bug_re,
+                   Markup(bug_url_anchor.format(m.group('bug_id'),
                                                    m.group('bug_text'))),
-                      s)
+                   s)
     return s
 
 
